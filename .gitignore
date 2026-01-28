@@ -1,0 +1,11 @@
+# === STM32CubeIDE / Eclipse metadata ===
+
+/*/.metadata
+/*/*/.settings/
+/*/*/.project
+/*/*/.cproject
+/*/*/.mxproject
+
+# === Build output ===
+/*/*/Debug/
+
