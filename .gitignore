@@ -5,6 +5,7 @@
 /*/*/.project
 /*/*/.cproject
 /*/*/.mxproject
+/*/*/*.launch
 
 # === Build output ===
 /*/*/Debug/
