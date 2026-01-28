@@ -43,6 +43,7 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+uint8_t delay = 4;
 
 /* USER CODE END PV */
 
@@ -67,7 +68,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	uint8_t delay = 0;
+
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -89,14 +90,20 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
+
+
   /* USER CODE BEGIN 2 */
-  if(PWR->SR1 & PWR_SR1_SBF){
-	  delay = 100;
-	  PWR->SCR = PWR_SCR_CSBF;
-	  while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);		// En caso de que iniciemos desde un Reset
+  if(__HAL_PWR_GET_FLAG(PWR_FLAG_SB)){					// Did you enter before Standby?
+
+	  __HAL_PWR_CLEAR_FLAG(PWR_SCR_CSBF);				// Clear Standby Flag
+	  __HAL_PWR_CLEAR_FLAG(PWR_SCR_CWUF);				// Clear Wake-up Pin Flags
+	  HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN2);		// Disable Wake-UP pin
+
+	  delay = 100;										// Identify blinking Led
+	  while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);		// Wait realese Boton
   }
   else{
-	  delay = 50;
+	  delay = 200;
   }
   /* USER CODE END 2 */
 
@@ -105,14 +112,18 @@ int main(void)
   while (1)
   {
 	  if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET){
-		  HAL_Delay(10);		// Delay of 50 miliseconds
-		  while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);	// Release the button
+		  HAL_Delay(50);		// Delay of 50 miliseconds
+		  if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET){
+			  while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);	// Release the button
+			  HAL_Delay(50);
+			  __HAL_PWR_CLEAR_FLAG(PWR_SCR_CSBF);
+			  __HAL_PWR_CLEAR_FLAG(PWR_SCR_CWUF);
 
-		  PWR->SCR = PWR_SCR_CWUF | PWR_SCR_CSBF;	// limpiar flags
-		  PWR->CR3 |= PWR_CR3_EWUP2;				// habilitar WKUP2
-		  PWR->CR4 |= PWR_CR4_WP2;					// flanco descendente
+			  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN2_LOW);
+			  HAL_PWREx_EnableSRAMRetention();
+			  HAL_PWR_EnterSTANDBYMode();				// Entrance
+		  }
 
-		  HAL_PWR_EnterSTANDBYMode();				// Entrance
 	}
 
 	  // Toggle Led Pin
