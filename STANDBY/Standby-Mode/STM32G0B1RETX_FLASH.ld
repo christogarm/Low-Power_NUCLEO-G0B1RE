@@ -148,7 +148,14 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
 
   } >RAM AT> FLASH
-
+	/* SRAM retained section (NOT cleared on reset) */
+	.noinit (NOLOAD) :
+	{
+	. = ALIGN(4);
+	*(.noinit)
+	*(.noinit*)
+	. = ALIGN(4);
+	} >RAM
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);
   .bss :

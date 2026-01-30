@@ -40,10 +40,14 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+RTC_HandleTypeDef hrtc;
+
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t delay = 4;
+__attribute__((section(".noinit"))) uint8_t delay;
+RTC_TimeTypeDef hTime = {0};
+RTC_DateTypeDef hDate = {0};
 
 /* USER CODE END PV */
 
@@ -51,6 +55,7 @@ uint8_t delay = 4;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_RTC_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -90,8 +95,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-
-
+  MX_RTC_Init();
   /* USER CODE BEGIN 2 */
   if(__HAL_PWR_GET_FLAG(PWR_FLAG_SB)){					// Did you enter before Standby?
 
@@ -105,6 +109,8 @@ int main(void)
   else{
 	  delay = 200;
   }
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -116,12 +122,13 @@ int main(void)
 		  if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET){
 			  while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);	// Release the button
 			  HAL_Delay(50);
-			  __HAL_PWR_CLEAR_FLAG(PWR_SCR_CSBF);
-			  __HAL_PWR_CLEAR_FLAG(PWR_SCR_CWUF);
+			  HAL_DBGMCU_DisableDBGStandbyMode();				// Disable GDB because GDB not allow FCLK or HCLK to be turned off during a debug session (RM044 - 40.9.1 Debug support for low-power modes)
+			  __HAL_PWR_CLEAR_FLAG(PWR_SCR_CSBF);				// Clean Stanby Flag
+			  __HAL_PWR_CLEAR_FLAG(PWR_SCR_CWUF);				// Clean Wake-up Pin Flags
 
-			  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN2_LOW);
-			  HAL_PWREx_EnableSRAMRetention();
-			  HAL_PWR_EnterSTANDBYMode();				// Entrance
+			  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN2_LOW);		// Enable Wake-up Pin
+			  HAL_PWREx_EnableSRAMRetention();					// Enable SRAM
+			  HAL_PWR_EnterSTANDBYMode();						// Entrance
 		  }
 
 	}
@@ -129,8 +136,12 @@ int main(void)
 	  // Toggle Led Pin
 	  HAL_Delay(delay);
 	  HAL_GPIO_TogglePin(LED_GREEN_GPIO_Port, LED_GREEN_Pin);
-    /* USER CODE END WHILE */
 
+	  // Obtain the Date and Time
+	  HAL_RTC_GetDate(&hrtc, &hDate, RTC_FORMAT_BCD);
+	  HAL_RTC_GetTime(&hrtc, &hTime, RTC_FORMAT_BCD);
+
+    /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
   }
@@ -150,10 +161,16 @@ void SystemClock_Config(void)
   */
   HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
 
+  /** Configure LSE Drive Capability
+  */
+  HAL_PWR_EnableBkUpAccess();
+  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
+
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -175,6 +192,73 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief RTC Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_RTC_Init(void)
+{
+
+  /* USER CODE BEGIN RTC_Init 0 */
+
+  /* USER CODE END RTC_Init 0 */
+
+  RTC_TimeTypeDef sTime = {0};
+  RTC_DateTypeDef sDate = {0};
+
+  /* USER CODE BEGIN RTC_Init 1 */
+
+  /* USER CODE END RTC_Init 1 */
+
+  /** Initialize RTC Only
+  */
+  hrtc.Instance = RTC;
+  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+  hrtc.Init.AsynchPrediv = 127;
+  hrtc.Init.SynchPrediv = 255;
+  hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+  hrtc.Init.OutPutRemap = RTC_OUTPUT_REMAP_NONE;
+  hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+  hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+  hrtc.Init.OutPutPullUp = RTC_OUTPUT_PULLUP_NONE;
+  if (HAL_RTC_Init(&hrtc) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* USER CODE BEGIN Check_RTC_BKUP */
+  if (HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR0) != 2244){
+  /* USER CODE END Check_RTC_BKUP */
+
+  /** Initialize RTC and set the Time and Date
+  */
+  sTime.Hours = 0x0;
+  sTime.Minutes = 0x0;
+  sTime.Seconds = 0x0;
+  sTime.SubSeconds = 0x0;
+  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
+  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sDate.WeekDay = RTC_WEEKDAY_WEDNESDAY;
+  sDate.Month = RTC_MONTH_JANUARY;
+  sDate.Date = 0x28;
+  sDate.Year = 0x26;
+
+  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN RTC_Init 2 */
+  	  HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR0, 2244);
+  }
+  /* USER CODE END RTC_Init 2 */
+
 }
 
 /**
