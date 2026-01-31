@@ -40,12 +40,14 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+IWDG_HandleTypeDef hiwdg;
+
 RTC_HandleTypeDef hrtc;
 
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-__attribute__((section(".noinit"))) uint8_t delay;
+__attribute__((section(".noinit"))) uint8_t delay;		// Variable placed in .noinit, so its value is not reset on MCU reboot
 RTC_TimeTypeDef hTime = {0};
 RTC_DateTypeDef hDate = {0};
 
@@ -56,6 +58,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_RTC_Init(void);
+static void MX_IWDG_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -96,6 +99,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_RTC_Init();
+  MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
   if(__HAL_PWR_GET_FLAG(PWR_FLAG_SB)){					// Did you enter before Standby?
 
@@ -104,7 +108,8 @@ int main(void)
 	  HAL_PWR_DisableWakeUpPin(PWR_WAKEUP_PIN2);		// Disable Wake-UP pin
 
 	  delay = 100;										// Identify blinking Led
-	  while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);		// Wait realese Boton
+	  while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET)		// Wait realese Boton
+		  HAL_IWDG_Refresh(&hiwdg);
   }
   else{
 	  delay = 200;
@@ -120,7 +125,10 @@ int main(void)
 	  if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET){
 		  HAL_Delay(50);		// Delay of 50 miliseconds
 		  if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET){
-			  while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET);	// Release the button
+
+			  while(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET)	// Release the button
+				  HAL_IWDG_Refresh(&hiwdg);
+
 			  HAL_Delay(50);
 			  HAL_DBGMCU_DisableDBGStandbyMode();				// Disable GDB because GDB not allow FCLK or HCLK to be turned off during a debug session (RM044 - 40.9.1 Debug support for low-power modes)
 			  __HAL_PWR_CLEAR_FLAG(PWR_SCR_CSBF);				// Clean Stanby Flag
@@ -128,7 +136,7 @@ int main(void)
 
 			  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN2_LOW);		// Enable Wake-up Pin
 			  HAL_PWREx_EnableSRAMRetention();					// Enable SRAM
-			  HAL_PWR_EnterSTANDBYMode();						// Entrance
+			  HAL_PWR_EnterSTANDBYMode();						// Entrance in standby mode
 		  }
 
 	}
@@ -140,6 +148,8 @@ int main(void)
 	  // Obtain the Date and Time
 	  HAL_RTC_GetDate(&hrtc, &hDate, RTC_FORMAT_BCD);
 	  HAL_RTC_GetTime(&hrtc, &hTime, RTC_FORMAT_BCD);
+
+	  HAL_IWDG_Refresh(&hiwdg);		// Refresh IWDG,	Remember, uncheck IWDG_STDBY to Freeze IWDDG counter in standby mode
 
     /* USER CODE END WHILE */
 
@@ -169,11 +179,13 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_LSI
+                              |RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -192,6 +204,35 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief IWDG Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_IWDG_Init(void)
+{
+
+  /* USER CODE BEGIN IWDG_Init 0 */
+
+  /* USER CODE END IWDG_Init 0 */
+
+  /* USER CODE BEGIN IWDG_Init 1 */
+
+  /* USER CODE END IWDG_Init 1 */
+  hiwdg.Instance = IWDG;
+  hiwdg.Init.Prescaler = IWDG_PRESCALER_256;
+  hiwdg.Init.Window = 4095;
+  hiwdg.Init.Reload = 500;
+  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN IWDG_Init 2 */
+
+  /* USER CODE END IWDG_Init 2 */
+
 }
 
 /**
