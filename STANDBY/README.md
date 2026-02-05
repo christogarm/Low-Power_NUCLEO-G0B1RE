@@ -34,9 +34,12 @@ On the other hand, the following peripherals, clocks, or features can remain act
 
 | **Active Feature** | **Theoretical Current<br>Consumption** | **Practical Current<br>Consumption** |
 |--------------------|----------------------------------------|--------------------------------------|
-| SRAM               | 515 µA                                 | 515 µA                               |
-| RTC                | 515 µA                                 | 515 µA                               |
-| IWDG               | 515 µA                                 | 515 µA                               |
+| Nothing            | 515 µA                                 | 1.9 µA                               |
+| SRAM               | 515 µA                                 | 2.4 µA                               |
+| RTC with LSI       | 515 µA                                 | 2.0 µA                               |
+| IWDG               | 515 µA                                 | 2.0 µA                               |
+| SRAM & IWDG & RTC  | 515 µA                                 | 2.5 µA                               |
+
 
 </center>
 
