@@ -9,6 +9,7 @@ When this mode is activated, the following features are disabled:
 - I/O configuration is lost (pull-up, pull-down, or no resistor must be reconfigured).
 - All peripheral registers are lost, except for some peripherals such as the RTC domain.
 
+## Wake-up Sources
 To exit Standby mode, the following events or interrupts can be used:
 - WKUPx pin edge
 - RTC event
@@ -17,9 +18,13 @@ To exit Standby mode, the following events or interrupts can be used:
 - IWDG reset
 - BOR
 
-After exiting Standby mode, the program counter restarts and the program is executed again from the reset vector.
+## Reset Behavior
+Standby mode always generates a system reset.
+The application restarts from the reset vector.
+Standby entry can be detected using PWR and RCC reset flags.
 
-On the other hand, the following peripherals, clocks, or features can remain active:
+## Memory Retention
+All other peripheral registers are lost, except the following peripherals:
 - SRAM
 - Backup registers
 - BOR
@@ -32,16 +37,23 @@ On the other hand, the following peripherals, clocks, or features can remain act
 
 <center>
 
-| **Active Feature** | **Theoretical Current<br>Consumption** | **Practical Current<br>Consumption** |
-|--------------------|----------------------------------------|--------------------------------------|
-| Nothing            | 515 µA                                 | 1.9 µA                               |
-| SRAM               | 515 µA                                 | 2.4 µA                               |
-| RTC with LSI       | 515 µA                                 | 2.0 µA                               |
-| IWDG               | 515 µA                                 | 2.0 µA                               |
-| SRAM & IWDG & RTC  | 515 µA                                 | 2.5 µA                               |
-
+| **Active Feature** | **Max Theoretical Current<br> Consumption at 25 °C** | **Practical Current<br>Consumption** |
+|--------------------|------------------------------------------------------|--------------------------------------|
+| Nothing            | 1.8 µA                                               | 1.9 µA                               |
+| SRAM               | 6.2 µA                                               | 2.4 µA                               |
+| RTC with LSI       | 3.3 µA                                               | 2.0 µA                               |
+| IWDG               | 3.0 µA                                               | 2.0 µA                               |
+| SRAM & IWDG & RTC  | 7.1 µA                                               | 2.5 µA                               |
 
 </center>
+
+The maximum theoretical current consumption is specified with a 3.6 V supply voltage (VDD).
+
+## Important Notes
+
+- If you use a debugger, it must be disabled to achieve correct Standby current consumption, you can use `HAL_DBGMCU_DisableDBGStandbyMode();`.
+- If you use the IWDG, remember to diseable `IWDG_STDBY` to freeze the IWDG counter while the MCU is in Standby mode.
+- If you use the RTC, you should use the RTC backup registers to verify whether the RTC configuration has been preserved or needs to be reconfigured.
 
 ## References
 
