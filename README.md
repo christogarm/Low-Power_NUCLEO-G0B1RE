@@ -3,19 +3,6 @@
 Low-power modes allow saving power when the CPU does not need to remain running.
 
 This device provides seven low-power modes:
-* **Low-Power Run Mode**
-  * System clock frequency is reduced below 2 MHz.
-  * Code is executed from SRAM or Flash memory.
-  * The regulator operates in low-power mode.
-
-* **Sleep Mode**
-  * CPU clock is stopped.
-  * Peripherals can continue running if their clocks are enabled.
-  * The CPU wakes up on an interrupt or event.
-
-* **Low-Power Sleep Mode**
-  * CPU clock is stopped.
-  * Selected peripherals can remain active.
 
 * **Stop Mode**
   * SRAM content is retained.
@@ -38,23 +25,22 @@ This device provides seven low-power modes:
 
 ## Power Consumption Summary
 
-The following table shows typical measured current consumption.  
-This data is based on maximum clock frequency, execution from RAM or Flash memory, and RTC enabled.
+The following table shows the typical measured current consumption.
+
 <center>
 
-| **Low-Power Mode**     | **Typical Current <br>Consumption** |
-| :--------------------- | :------------------------------ |
-| Low-Power Run Mode     | 515 [µA]                          |
-| Sleep Mode             | 1.9 [mA]                          |
-| Low-Power Sleep Mode   | 70 [µA]                           |
-| Stop Mode (0 / 1)\*    | 300 / 7.8 [µA]                    |
-| Standby Mode\*\*       | 2.5 [µA]                          |
-| Shutdown Mode          | 550 [nA]                          |
+| **Low-Power Mode**     | **Typical Current Consumption \*** |
+| :--------------------- | :----------------------------------|
+| Stop Mode (0 / 1)\*\*  | 105 / 3.45 [µA]                     |
+| Standby Mode           | 0.25 [µA]                           |
+| Shutdown Mode          | 47.5 [nA]                           |
 
 </center>
 
-> \* Stop mode includes **STOP 0 and STOP 1** configurations.  
-> \*\* Standby mode can preserve SRAM.
+> \* All low-power modes are measured under their lowest current consumption conditions .<br>
+> \*\* Stop Mode values correspond to STOP 0 / STOP 1 respectively.
+> This data is interpolated between VDD = 3.6 V and VDD = 3.0 V to obtain values at VDD = 3.3 V.
+
 
 You can consult the theory current consumption in [STM32G0B1 Datasheet](https://www.st.com/resource/en/datasheet/stm32g0b1cc.pdf) in the section **5.3.5 Supply current characteristics** to review your particular case.
 

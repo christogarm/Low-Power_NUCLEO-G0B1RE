@@ -47,7 +47,8 @@ All other peripheral registers are lost, except the following peripherals:
 
 </center>
 
-The maximum theoretical current consumption is specified with a 3.3 V supply voltage (VDD) and disable ultra low-power.
+> The maximum theoretical current consumption is specified with a 3.3 V supply voltage (VDD) and disable ultra low-power.
+> This data is interpolated between VDD = 3.6 V and VDD = 3.0 V to obtain values at VDD = 3.3 V.
 
 ## Ultra-low-power enable (ENB_ULP)
 

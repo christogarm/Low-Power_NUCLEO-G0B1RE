@@ -65,7 +65,8 @@ Note: The availability of some wake-up sources depends on the peripheral configu
 
 </center>
 
-\* Current consumption corresponds to STOP 0 mode only, with no additional peripherals enabled.
+> \* Current consumption corresponds to STOP 0 mode only, with no additional peripherals enabled.
+> This data is interpolated between VDD = 3.6 V and VDD = 3.0 V to obtain values at VDD = 3.3 V.
 
 The current consumption values are specified at **VDD = 3.3 V**, **25 °C**, with **RTC enabled** and **Flash memory powered down**, unless otherwise stated.
 
