@@ -136,6 +136,8 @@ int main(void)
 
 			  HAL_PWR_EnableWakeUpPin(PWR_WAKEUP_PIN2_LOW);		// Enable Wake-up Pin
 			  HAL_PWREx_EnableSRAMRetention();					// Enable SRAM
+			  HAL_PWREx_EnablePORMonitorSampling();				// Enable Ultra Low Power
+
 			  HAL_PWR_EnterSTANDBYMode();						// Entrance in standby mode
 		  }
 

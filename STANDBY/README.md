@@ -37,17 +37,36 @@ All other peripheral registers are lost, except the following peripherals:
 
 <center>
 
-| **Active Feature** | **Max Theoretical Current<br> Consumption at 25 °C** | **Practical Current<br>Consumption** |
-|--------------------|------------------------------------------------------|--------------------------------------|
-| Nothing            | 1.8 µA                                               | 1.9 µA                               |
-| SRAM               | 6.2 µA                                               | 2.4 µA                               |
-| RTC with LSI       | 3.3 µA                                               | 2.0 µA                               |
-| IWDG               | 3.0 µA                                               | 2.0 µA                               |
-| SRAM & IWDG & RTC  | 7.1 µA                                               | 2.5 µA                               |
+| **Active Feature** | **Current Consumption** | **Measured Current Consumption** |
+|--------------------|-------------------------|----------------------------------|
+| Nothing            | 1.2 µA                  | 1.9 µA                           |
+| SRAM               | 2.35 µA                 | 2.4 µA                           |
+| RTC with LSI       | 1.75 µA                 | 2.0 µA                           |
+| IWDG               | 1.55 µA                 | 2.0 µA                           |
+| SRAM & IWDG & RTC  | 3.25 µA                 | 2.5 µA                           |
 
 </center>
 
-The maximum theoretical current consumption is specified with a 3.6 V supply voltage (VDD).
+The maximum theoretical current consumption is specified with a 3.3 V supply voltage (VDD) and disable ultra low-power.
+
+## Ultra-low-power enable (ENB_ULP)
+
+This configuration enables or disables **periodical sampling of the supply voltage** in Stop and Standby modes for detecting **PDR and BOR reset conditions**.
+
+When ultra-low-power mode is enabled (`HAL_PWREx_EnablePORMonitorSampling();`), the supply voltage is not continuously monitored. If the voltage drops below the minimum operating condition between two samples, a **BOR or PDR reset may not be detected**.
+
+This may result in **unreliable system behavior**, as the device could continue operating outside its specified voltage range. For this reason, this mode should only be used when a **stable and well-controlled power source** is guaranteed.
+
+The following table shows the measured current consumption with **Ultra-low-power mode enabled**:
+
+<center>
+
+| **Active Feature** | **Measured Current Consumption** |
+|--------------------|----------------------------------|
+| Nothing            | 1.0 µA                           |
+| SRAM & IWDG & RTC  | 1.6 µA                           |
+
+</center>
 
 ## Important Notes
 
