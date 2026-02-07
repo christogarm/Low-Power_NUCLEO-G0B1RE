@@ -27,19 +27,16 @@ The application restarts from the reset vector.
 
 <center>
 
-| **RTC** | **Max Theoretical Current<br> Consumption at 25 °C** | **Practical Current<br>Consumption** |
-|---------|------------------------------------------------------|--------------------------------------|
-| Disable | 435 nA                                               | 1.9 nA                               |
-| Enable  | 520 nA*                                              | 2.4 nA**                             |
-
-
+| **RTC** | **Current Consumption** | **Measured Current Consumption** |
+|---------|-------------------------|----------------------------------|
+| Disable | 47.5 nA                 | 300 nA                           |
+| Enable  | 487.5 nA*               | 300 nA**                         |
 
 </center>
 
-\* This current is clocked by LSE bypass at 32.768 kHz <br>
-\*\* This current is clocked by LSE crystal at 32.768 kHz
-
-The maximum theoretical current consumption is specified with a 3.3 V supply voltage (VDD).
+> \* This current is clocked by LSE bypass at 32.768 kHz <br>
+> \*\* This current is clocked by LSE crystal at 32.768 kHz <br>
+> This data is interpolated between VDD = 3.6 V and VDD = 3.0 V to obtain values at VDD = 3.3 V.
 
 ## Important Notes
 
