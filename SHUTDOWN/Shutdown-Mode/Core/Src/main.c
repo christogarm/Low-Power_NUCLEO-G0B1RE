@@ -50,6 +50,7 @@ UART_HandleTypeDef huart2;
 uint8_t delay = 200;		// Variable placed in .noinit, so its value is not reset on MCU reboot
 RTC_TimeTypeDef hTime = {0};
 RTC_DateTypeDef hDate = {0};
+char msg[128] = "Hola desde la Nucleo G0B1\r\n";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -75,7 +76,14 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+	uint8_t count = 0;
+	char hour[] = "12";
+	char minutes[] = "24";
+	char seconds[] = "48";
 
+	char day[] = "01";
+	char month[] = "02";
+	char year[] = "26";
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -132,6 +140,14 @@ int main(void)
 	 	  // Obtain the Date and Time
 	 	  HAL_RTC_GetDate(&hrtc, &hDate, RTC_FORMAT_BCD);
 	 	  HAL_RTC_GetTime(&hrtc, &hTime, RTC_FORMAT_BCD);
+
+	 	 count++;
+	 	  if(count == 10){
+	 		  count = 0;
+
+	 		  HAL_UART_Transmit(&huart2, (uint8_t*)msg, sizeof(msg) - 1, HAL_MAX_DELAY);
+	 	  }
+
 
 	 	  HAL_IWDG_Refresh(&hiwdg);		// Refresh IWDG,	Remember, uncheck IWDG_STDBY to Freeze IWDDG counter in standby mode
 
