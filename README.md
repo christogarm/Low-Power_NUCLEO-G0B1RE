@@ -50,7 +50,16 @@ Disconnect **JP3** and measure the current consumption to verify the low-power m
 
 ![Screenshot of Nucleo-G0B1RE from https://www.st.com/en/evaluation-tools/nucleo-g0b1re.html#.](img/Nucleo-G0B1RE-JP3.png)
 
+### Serial Configuration Parameters
 
+If you want to see the Date and Time of the RTC, configure the serial terminal with the following settings:
+
+* Port: COMx (check Device Manager)
+* Baud rate: 115200
+* Data bits: 8
+* Parity: None
+* Stop bits: 1
+* Flow control: None
 
 ## References
 
